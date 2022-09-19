@@ -1,0 +1,75 @@
+{% extends "newset/template.html" %}
+
+{% block title %}
+    Create New Set
+{% endblock %}
+
+{% block main %}
+    <div class="container" id="container">
+        <h1>Create New Set</h1>
+        <div>
+            <span>1</span>
+            <input type="text" placeholder="Term">
+            <input type="text" placeholder="Definition">
+            <button type="button" class="btn btn-danger btn-sm" onclick="deleteTerm(1)">Delete</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <button type="button" class="btn btn-primary" onclick="createNewTerm()">Add Another Term</button>
+    </div>
+
+    <script>
+        var total = 1;
+        var currId = 1;
+
+        function createNewTerm() {
+            total++
+            currId++
+            
+            var div = document.createElement("div")
+            var id = document.createElement("span")
+            var deleteBtn = document.createElement("button")
+            id.innerText = currId
+            id.setAttribute("id", "order-"+currId)
+
+            var term = document.createElement("input")
+            var definition = document.createElement("input")
+
+            term.setAttribute("type", "text")
+            term.setAttribute("placeholder", "Term")
+
+            definition.setAttribute("type", "text")
+            definition.setAttribute("placeholder", "Definition")
+
+            deleteBtn.setAttribute("type", "button")
+            deleteBtn.setAttribute("class", "btn btn-danger btn-sm")
+            deleteBtn.setAttribute("onclick", `deleteTerm()`) // set it to parent's className 
+            deleteBtn.innerText = "Delete"
+
+            div.appendChild(id)
+            div.appendChild(term)
+            div.appendChild(definition)
+            div.appendChild(deleteBtn)
+            div.setAttribute("id", "id-" + currId)
+            document.getElementById("container").appendChild(div)
+
+        }
+
+        function deleteTerm(id) {
+            const elements = document.getElementById("id-"+  id);
+            elements.remove()
+            
+            for (var i=id+1; i<=total; i++) {
+                document.getElementById("order-"+i).innerText = (i-1)
+                document.getElementById("order-"+i).setAttribute("id", "order-"+(i-1))
+                document.getElementById("id-"+i).setAttribute("id", "order-"+(i-1))
+
+                console.log("order-"+(i-1))
+            }
+            total--
+            
+            currId = total
+        }
+    </script>
+{% endblock %}
