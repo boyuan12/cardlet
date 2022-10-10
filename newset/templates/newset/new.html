@@ -9,14 +9,15 @@
         <h1>Create New Set</h1>
         <div>
             <span>1</span>
-            <input type="text" placeholder="Term">
-            <input type="text" placeholder="Definition">
+            <input type="text" placeholder="Term" class="terms">
+            <input type="text" placeholder="Definition" class="definitions">
             <button type="button" class="btn btn-danger btn-sm" onclick="deleteTerm(1)">Delete</button>
         </div>
     </div>
 
     <div class="container">
         <button type="button" class="btn btn-primary" onclick="createNewTerm()">Add Another Term</button>
+        <button type="button" class="btn btn-success" onclick="submit()">Submit</button>
     </div>
 
     <script>
@@ -38,13 +39,16 @@
 
             term.setAttribute("type", "text")
             term.setAttribute("placeholder", "Term")
+            term.setAttribute("class", "terms")
 
             definition.setAttribute("type", "text")
             definition.setAttribute("placeholder", "Definition")
+            definition.setAttribute("class", "definitions")
 
             deleteBtn.setAttribute("type", "button")
+            deleteBtn.setAttribute("id", `del-${currId}`)
             deleteBtn.setAttribute("class", "btn btn-danger btn-sm")
-            deleteBtn.setAttribute("onclick", `deleteTerm()`) // set it to parent's className 
+            deleteBtn.setAttribute("onclick", `deleteTerm(${currId})`) // set it to parent's className 
             deleteBtn.innerText = "Delete"
 
             div.appendChild(id)
@@ -57,19 +61,48 @@
         }
 
         function deleteTerm(id) {
-            const elements = document.getElementById("id-"+  id);
+            const elements = document.getElementById("id-" + id);
             elements.remove()
             
             for (var i=id+1; i<=total; i++) {
-                document.getElementById("order-"+i).innerText = (i-1)
-                document.getElementById("order-"+i).setAttribute("id", "order-"+(i-1))
-                document.getElementById("id-"+i).setAttribute("id", "order-"+(i-1))
+                try {
+                    document.getElementById("order-"+i).innerText = (i-1)
+                    document.getElementById("order-"+i).setAttribute("id", "order-"+(i-1))
+                    document.getElementById("id-"+i).setAttribute("id", "id-"+(i-1))
+                    document.getElementById("del-"+i).setAttribute("onclick", `deleteTerm(${i-1})`)
+                    document.getElementById("del-"+i).setAttribute("id", "del-"+(i-1))
+                } catch(err) {
+                    console.log(err)
+                }
 
                 console.log("order-"+(i-1))
             }
             total--
             
             currId = total
+        }
+
+        function submit() {
+            data = []
+            var terms = document.getElementsByClassName("terms")
+            var definitions = document.getElementsByClassName("definitions")
+            
+            if (terms.length !== definitions.length) {
+                alert("SOMETHING WENT WRONG! PLEASE REFRESH THE PAGE...")
+            }
+
+            for (var i=0; i<terms.length; i++) {
+                data.push([terms[i].value])
+            }
+
+            for (var i=0; i<definitions.length; i++) {
+                data[i].push(definitions[i].value)
+            }
+
+            fetch("/new/", {
+                method: "POST",
+                body: JSON.stringify(data)
+            })
         }
     </script>
 {% endblock %}
