@@ -19,4 +19,5 @@ from django.urls import include, path
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('new/', include("newset.urls")),
+    path('set/', include("viewset.urls")),
 ]
