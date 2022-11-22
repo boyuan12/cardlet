@@ -51,6 +51,31 @@
         color: white;
         transform: rotateY(180deg);
         }
+
+        .previous {
+          background-color: #f1f1f1;
+          color: black;
+        }
+
+        .next {
+          background-color: #04AA6D;
+          color: white;
+        }
+
+        a {
+          text-decoration: none;
+          display: inline-block;
+          padding: 8px 16px;
+        }
+
+        a:hover {
+          background-color: #ddd;
+          color: black;
+        }
+
+        .round {
+          border-radius: 50%;
+        }
     </style>
     <div class="container">
         {{ set }}
@@ -58,12 +83,32 @@
         <div class="flip-card">
             <div class="flip-card-inner">
               <div class="flip-card-front">
-                <h1>{{ flashcards.0.word }}</h1>
+                <h1 id="word">{{ flashcards.0.word }}</h1>
               </div>
               <div class="flip-card-back">
-                <h1>{{ flashcards.0.definition }}</h1>
+                <h1 id="def">{{ flashcards.0.definition }}</h1>
               </div>
             </div>
         </div>
+        <a href="#" class="next round" onclick="viewNextCard()">&#8250;</a>
     </div>
+
+    <script>
+      var curr=  0
+      var max = parseInt('{{ flashcards.count }}')-1
+      
+      function viewNextCard() {
+        console.log("hi")
+        if (curr != max) {
+          curr++
+          fetch(`/set/json/{{ set.set_id }}?order=${curr}`)
+          .then(response => response.json())
+          .then(data => {
+            console.log(data)
+            document.getElementById("word").innerText = data["word"]
+            document.getElementById("def").innerText = data["def"]
+          })
+        }
+      }
+    </script>
 {% endblock %}
