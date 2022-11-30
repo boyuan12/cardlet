@@ -1,10 +1,11 @@
-from curses import flash
+from io import StringIO
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import json
 from .models import FlashCard, Set
 import helpers
+import csv
 
 # Create your views here.
 @csrf_exempt
@@ -22,3 +23,13 @@ def new_set(request):
         return JsonResponse({"redirect": f"/set/{set.set_id}"})
     else:
         return render(request, "newset/new.html")
+
+def upload_set_via_csv(request):
+    if request.method == "POST":
+        f = request.FILES['file']
+        file = f.read().decode('utf-8')
+        csv_data = csv.reader(StringIO(file), delimiter=',')
+        for row in csv_data:
+            print(row)
+    else:
+        return render(request, "newset/upload.html")

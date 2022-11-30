@@ -90,15 +90,35 @@
               </div>
             </div>
         </div>
+        <a href="#" class="previous round" onclick="viewPrevCard()">&#8249;</a>
         <a href="#" class="next round" onclick="viewNextCard()">&#8250;</a>
+        <br>
+        <span><span id="curr">1</span> / {{ flashcards.count }}</span>
+
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Term</th>
+              <th scope="col">Definition</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for card in flashcards %}
+              <tr>
+                <th scope="row">{{ card.word }}</th>
+                <td>{{ card.definition }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
     </div>
 
     <script>
-      var curr=  0
+      var curr =  0
       var max = parseInt('{{ flashcards.count }}')-1
-      
+      var min = 0
+  
       function viewNextCard() {
-        console.log("hi")
         if (curr != max) {
           curr++
           fetch(`/set/json/{{ set.set_id }}?order=${curr}`)
@@ -109,6 +129,21 @@
             document.getElementById("def").innerText = data["def"]
           })
         }
+        document.getElementById("curr").innerText = curr + 1
+      }
+
+      function viewPrevCard() {
+        if (curr != min) {
+          curr--
+          fetch(`/set/json/{{ set.set_id }}?order=${curr}`)
+          .then(response => response.json())
+          .then(data => {
+            console.log(data)
+            document.getElementById("word").innerText = data["word"]
+            document.getElementById("def").innerText = data["def"]
+          })
+        }
+        document.getElementById("curr").innerText = curr + 1
       }
     </script>
 {% endblock %}
