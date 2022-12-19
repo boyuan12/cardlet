@@ -9,7 +9,7 @@
         /* The flip card container - set the width and height to whatever you want. We have added the border property to demonstrate that the flip itself goes out of the box on hover (remove perspective if you don't want the 3D effect */
         .flip-card {
         background-color: transparent;
-        width: 300px;
+        width: 600px;
         height: 200px;
         border: 1px solid #f1f1f1;
         perspective: 1000px; /* Remove this if you don't want the 3D effect */
@@ -78,15 +78,13 @@
         }
     </style>
     <div class="container">
-        {{ set }}
-        {{ flashcards }}
         <div class="flip-card">
             <div class="flip-card-inner">
               <div class="flip-card-front">
                 <h1 id="word">{{ flashcards.0.word }}</h1>
               </div>
               <div class="flip-card-back">
-                <h1 id="def">{{ flashcards.0.definition }}</h1>
+                <p id="def">{{ flashcards.0.definition }}</h1>
               </div>
             </div>
         </div>

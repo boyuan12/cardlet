@@ -1,0 +1,27 @@
+{% extends "newset/template.html" %}
+
+{% block title %}
+    Learn {{ set.title }} Set
+{% endblock %}
+
+{% block main %}
+    <div class="container">
+        <small>Definition</small>
+        <h1>Actual Definition</h1>
+        <hr>
+        <button><h1>A. <span>option...</span></h1></button> <br> <br>
+        <button><h1>B. <span>option...</span></h1></button> <br> <br>
+        <button><h1>C. <span>option...</span></h1></button> <br> <br>
+        <button><h1>D. <span>option...</span></h1></button>
+    </div>
+
+    <script>
+        // {pk: int} 0 mc not complete, 1 mc complete, 2 mc wrong, 3 fill-in complete, 4 fill-in wrong, 5 completed
+        fetch(`/set/json/{{ set.set_id }}`)
+        .then(response => response.json())
+        .then(data => {
+            console.log(data["Microsoft"])
+            console.log(data)
+        })
+    </script>
+{% endblock %}

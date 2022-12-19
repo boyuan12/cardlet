@@ -28,8 +28,17 @@ def upload_set_via_csv(request):
     if request.method == "POST":
         f = request.FILES['file']
         file = f.read().decode('utf-8')
+        title = request.POST["title"]
         csv_data = csv.reader(StringIO(file), delimiter=',')
+        set = Set.objects.create(title=title, user=request.user, set_id=helpers.random_int())
+        order = 0
+
         for row in csv_data:
-            print(row)
+            if row == ["key", "definition"]:
+                continue
+            FlashCard.objects.create(order=order, word=row[0], definition=row[1], set=set)
+            order += 1
+
+        return redirect(f"/set/{set.set_id}")
     else:
         return render(request, "newset/upload.html")
