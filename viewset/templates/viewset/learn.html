@@ -7,21 +7,92 @@
 {% block main %}
     <div class="container">
         <small>Definition</small>
-        <h1>Actual Definition</h1>
+        <h1 id="def">Actual Definition</h1>
         <hr>
-        <button><h1>A. <span>option...</span></h1></button> <br> <br>
-        <button><h1>B. <span>option...</span></h1></button> <br> <br>
-        <button><h1>C. <span>option...</span></h1></button> <br> <br>
-        <button><h1>D. <span>option...</span></h1></button>
+        <button onclick="answer()"><h1 id="opt-A">A. <span>option...</span></h1></button> <br> <br>
+        <button onclick="answer()"><h1 id="opt-B">B. <span>option...</span></h1></button> <br> <br>
+        <button onclick="answer()"><h1 id="opt-C">C. <span>option...</span></h1></button> <br> <br>
+        <button onclick="answer()"><h1 id="opt-D">D. <span>option...</span></h1></button>
     </div>
 
     <script>
         // {pk: int} 0 mc not complete, 1 mc complete, 2 mc wrong, 3 fill-in complete, 4 fill-in wrong, 5 completed
-        fetch(`/set/json/{{ set.set_id }}`)
-        .then(response => response.json())
-        .then(data => {
-            console.log(data["Microsoft"])
+        function getData() {
+            return new Promise((resolve, reject) => {
+                fetch('/set/json/{{ set.set_id }}')
+                .then(response => response.json())
+                .then(data_from_fetched => {
+                    let data = data_from_fetched.results
+                    resolve(data)
+                })
+            })    
+        }
+
+        let d = {};
+        getData().then(data => {
+            d = data
             console.log(data)
-        })
+        });
+       
+            // var status = {}
+            // for (let i=0; i<data.length; i++) {
+            //     console.log(data[i])
+            //     status[data[i]["pk"]] = 0
+            // }
+            // var ind = pickWord(status)
+            // generateQuestion(data, ind)
+        
+
+        function pickWord(status) {
+            var zeros = []
+            var ones = []
+            var twos = []
+            var threes = []
+            var fours = []
+            var fives = []
+
+            for (let i=0; i<Object.keys(status).length; i++) {
+                var key = Object.keys(status)[i]
+                var val = status[key]
+
+                if (val === 0) {
+                    zeros.push(key)
+                }
+            }
+            
+            var randInd = Math.floor(Math.random() * zeros.length)
+            return randInd
+        }
+
+        function generateQuestion(data, index) {
+            document.getElementById("def").innerText = data[index]["fields"]["definition"]
+            var randInts = randIntNoRepeat(0, data.length-1, 4, [index])
+            
+            document.getElementById("opt-A").innerText = data[randInts[0]]["fields"]["word"]
+            document.getElementById("opt-B").innerText = data[randInts[1]]["fields"]["word"]
+            document.getElementById("opt-C").innerText = data[randInts[2]]["fields"]["word"]
+            document.getElementById("opt-D").innerText = data[randInts[3]]["fields"]["word"]
+        }
+
+        function randIntNoRepeat(min, max, count, arr=[]) {
+            do {
+                let num = Math.floor(Math.random() * (max-min) + min);
+                arr.push(num);
+                arr = arr.filter((item, index) => {
+                    return arr.indexOf(item) === index
+                });
+            } while (arr.length < count);
+            return shuffleArray(arr)
+        }
+
+        function shuffleArray(array) {
+            for (var i = array.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
+            }
+            return array
+        }
     </script>
 {% endblock %}
