@@ -5,51 +5,50 @@
 {% endblock %}
 
 {% block main %}
+    <span id="status" style="display: none"></span>
     <div class="container">
         <small>Definition</small>
         <h1 id="def">Actual Definition</h1>
         <hr>
-        <button onclick="answer()"><h1 id="opt-A">A. <span>option...</span></h1></button> <br> <br>
-        <button onclick="answer()"><h1 id="opt-B">B. <span>option...</span></h1></button> <br> <br>
-        <button onclick="answer()"><h1 id="opt-C">C. <span>option...</span></h1></button> <br> <br>
-        <button onclick="answer()"><h1 id="opt-D">D. <span>option...</span></h1></button>
+        <button onclick="answer(0)"><h1 id="opt-A">A. <span>option...</span></h1></button> <br> <br>
+        <button onclick="answer(1)"><h1 id="opt-B">B. <span>option...</span></h1></button> <br> <br>
+        <button onclick="answer(2)"><h1 id="opt-C">C. <span>option...</span></h1></button> <br> <br>
+        <button onclick="answer(3)"><h1 id="opt-D">D. <span>option...</span></h1></button>
     </div>
 
     <script>
         // {pk: int} 0 mc not complete, 1 mc complete, 2 mc wrong, 3 fill-in complete, 4 fill-in wrong, 5 completed
-        function getData() {
-            return new Promise((resolve, reject) => {
-                fetch('/set/json/{{ set.set_id }}')
-                .then(response => response.json())
-                .then(data_from_fetched => {
-                    let data = data_from_fetched.results
-                    resolve(data)
-                })
-            })    
-        }
+        var correct;
+        var statusG;
+        var currentPk;
+        var dataG;
+        const QUESTION_PER_ROUND = 7;
+        var questionDone = 0;
 
-        let d = {};
-        getData().then(data => {
-            d = data
-            console.log(data)
-        });
-       
-            // var status = {}
-            // for (let i=0; i<data.length; i++) {
-            //     console.log(data[i])
-            //     status[data[i]["pk"]] = 0
-            // }
-            // var ind = pickWord(status)
-            // generateQuestion(data, ind)
-        
+        fetch('/set/json/{{ set.set_id }}')
+        .then(response => response.json())
+        .then(data => {
+            var status = {}
+            for (let i=0; i<data.length; i++) {
+                console.log(data[i])
+                status[data[i]["pk"]] = 0
+            }
+            var ind = pickWord(data, status)
+            generateMCQuestion(data, ind)
 
-        function pickWord(status) {
+            document.getElementById("status").innerText = JSON.stringify(status)
+        })
+
+
+        function pickWord(data, status) {
+            statusG = status
             var zeros = []
             var ones = []
             var twos = []
             var threes = []
             var fours = []
             var fives = []
+            dataG = data
 
             for (let i=0; i<Object.keys(status).length; i++) {
                 var key = Object.keys(status)[i]
@@ -57,16 +56,46 @@
 
                 if (val === 0) {
                     zeros.push(key)
+                } else if (val === 1) {
+                    ones.push(key)
+                } else if (val === 2) {
+                    twos.push(key)
+                } else if (val === 3) {
+                    threes.push(key)
+                } else if (val === 4) {
+                    fours.push(key)
+                } else if (val === 5) {
+                    fives.push(key)
                 }
             }
             
-            var randInd = Math.floor(Math.random() * zeros.length)
-            return randInd
+            console.log(zeros)
+            if (zeros.length != 0) {
+                var randInd = Math.floor(Math.random() * zeros.length)
+                var targetPk = zeros[randInd]
+            } else if (twos.length != 0) {
+                var randInd = Math.floor(Math.random() * twos.length)
+                var targetPk = twos[randInd]
+            }
+
+            for (let i=0; i<dataG.length; i++) {
+                if (dataG[i]["pk"] == targetPk) {
+                    return i
+                }
+            }
         }
 
-        function generateQuestion(data, index) {
+        function generateMCQuestion(data, index) {
             document.getElementById("def").innerText = data[index]["fields"]["definition"]
             var randInts = randIntNoRepeat(0, data.length-1, 4, [index])
+            currentPk = data[index]["pk"];
+
+            for (let i=0; i<randInts.length; i++) {
+                if (data[randInts[i]]["fields"]["definition"] == data[index]["fields"]["definition"]) {
+                    correct = i;
+                    console.log(correct)
+                }
+            }
             
             document.getElementById("opt-A").innerText = data[randInts[0]]["fields"]["word"]
             document.getElementById("opt-B").innerText = data[randInts[1]]["fields"]["word"]
@@ -93,6 +122,21 @@
                 array[j] = temp;
             }
             return array
+        }
+
+        function answer(ansSelected) {
+            questionDone++
+            console.log(ansSelected)
+            if (ansSelected == correct) {
+                statusG[currentPk] += 1 // TODO: Logic issue with increment, ie 0 -> 1, 1 -> 3
+            } else {
+                if (statusG[currentPk] == 0 || statusG[currentPk] % 2 != 0) {
+                    statusG[currentPk] += 2
+                }
+            }
+            console.log(statusG)
+            var ind = pickWord(dataG, statusG)
+            generateMCQuestion(dataG, ind)
         }
     </script>
 {% endblock %}
